@@ -1,0 +1,8 @@
+User-Agent: Yeti
+Allow: /
+
+User-Agent: *
+Allow: /
+
+Host: https://pc365.it.kr
+Sitemap: https://pc365.it.kr/sitemap.xml
