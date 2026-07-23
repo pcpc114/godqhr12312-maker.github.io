@@ -40,8 +40,8 @@
 <meta name="twitter:image:alt" content="성인피씨·성인PC방 매물·창업 정보 피씨365">
 
 <!-- LCP 이미지(히어로 포스터) 프리로드: 최우선 다운로드 -->
-<link rel="preload" as="image" href="download-520.jpg"
-      imagesrcset="download-520.jpg 520w, download.jpg 825w"
+<link rel="preload" as="image" type="image/webp" href="download-520.webp"
+      imagesrcset="download-520.webp 520w, download.webp 825w"
       imagesizes="(max-width: 846px) 380px, 520px" fetchpriority="high">
 
 <!-- 본문 폰트 프리로드 (서브셋 후 각 40KB) : 글자 늦게 뜨는 현상 방지 -->
@@ -90,6 +90,7 @@ body {
 a { color: inherit; text-decoration: none; }
 ul, li { list-style: none; }
 img { max-width: 100%; display: block; }
+picture { display: contents; }   /* <picture> 래퍼가 레이아웃에 영향 주지 않도록 */
 button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
 
 /* 접근성: 키보드 포커스 링 + 본문 바로가기 링크 */
@@ -442,7 +443,10 @@ main:focus { outline: none; }
 <!-- ============================ HEADER ============================ -->
 <header id="header">
   <div class="header-inner">
-    <p class="logo"><a href="/"><img src="logo-header-260.png" srcset="logo-header-260.png 1x, logo-header-500.png 2x" width="260" height="78" decoding="async" alt="성인피씨·성인PC 창업정보 플랫폼 피씨365 로고"></a></p>
+    <p class="logo"><a href="/"><picture>
+      <source type="image/webp" srcset="logo-header-260.webp 1x, logo-header-500.webp 2x">
+      <img src="logo-header-260.png" srcset="logo-header-260.png 1x, logo-header-500.png 2x" width="260" height="78" decoding="async" alt="성인피씨·성인PC 창업정보 플랫폼 피씨365 로고">
+    </picture></a></p>
     <nav class="gnb" aria-label="주 메뉴"><a href="/">home</a></nav>
     <!-- 햄버거: 원본과 동일하게 데스크탑에서는 숨김, 모바일에서만 표시 -->
     <button class="hamburger" id="asideOpen" aria-label="메뉴 열기" aria-expanded="false" aria-controls="aside">
@@ -489,10 +493,14 @@ main:focus { outline: none; }
     </section>
 
     <section class="image-banner">
-        <img class="bb-logo" src="download-520.jpg"
-             srcset="download-520.jpg 520w, download.jpg 825w"
-             sizes="(max-width: 846px) 380px, 520px"
-             width="825" height="1024" fetchpriority="high" decoding="async" alt="피씨365 성인PC방 매물·양도·창업 정보 안내 포스터">
+        <picture>
+          <source type="image/webp" srcset="download-520.webp 520w, download.webp 825w"
+                  sizes="(max-width: 846px) 380px, 520px">
+          <img class="bb-logo" src="download-520.jpg"
+               srcset="download-520.jpg 520w, download.jpg 825w"
+               sizes="(max-width: 846px) 380px, 520px"
+               width="825" height="1024" fetchpriority="high" decoding="async" alt="피씨365 성인PC방 매물·양도·창업 정보 안내 포스터">
+        </picture>
     </section>
   </div>
 
@@ -681,7 +689,10 @@ main:focus { outline: none; }
 <!-- ============================ FOOTER ============================ -->
 <footer id="footer">
   <div class="inner">
-    <a href="/" class="foot-logo"><img src="logo-header-500.png" width="500" height="150" loading="lazy" decoding="async" alt="피씨365 로고"></a>
+    <a href="/" class="foot-logo"><picture>
+      <source type="image/webp" srcset="logo-header-500.webp">
+      <img src="logo-header-500.png" width="500" height="150" loading="lazy" decoding="async" alt="피씨365 로고">
+    </picture></a>
     <p class="foot-info">상호 : 피씨365 &nbsp;·&nbsp; 홈페이지 : 피씨365.COM<br>COPYRIGHT © 피씨365 ALL RIGHTS RESERVED.<br>정보 업데이트 : <time datetime="2026-07-23">2026-07-23</time></p>
   </div>
 </footer>
