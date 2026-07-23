@@ -25,9 +25,10 @@
 <meta property="og:title" content="성인피씨·성인PC 매물·창업 정보 | 피씨365">
 <meta property="og:description" content="전국 성인피씨·성인PC 매물, 양도·임대, 창업 정보를 한 곳에서. 성인피씨창업 가이드와 매물 정보를 피씨365.COM에서 확인하세요.">
 <meta property="og:url" content="https://pc365.it.kr/">
-<meta property="og:image" content="https://pc365.it.kr/download.jpg">
-<meta property="og:image:width" content="825">
-<meta property="og:image:height" content="1024">
+<meta property="og:image" content="https://pc365.it.kr/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:type" content="image/jpeg">
 <meta property="og:image:alt" content="성인피씨·성인PC방 매물·창업 정보 피씨365">
 <meta property="og:locale" content="ko_KR">
 
@@ -35,20 +36,19 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="성인피씨·성인PC 매물·창업 정보 | 피씨365">
 <meta name="twitter:description" content="전국 성인피씨·성인PC 매물·양도·창업 정보 플랫폼, 피씨365.COM">
-<meta name="twitter:image" content="https://pc365.it.kr/download.jpg">
+<meta name="twitter:image" content="https://pc365.it.kr/og-image.jpg">
 <meta name="twitter:image:alt" content="성인피씨·성인PC방 매물·창업 정보 피씨365">
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
 <!-- LCP 이미지(히어로 포스터) 프리로드: 최우선 다운로드 -->
 <link rel="preload" as="image" href="download-520.jpg"
       imagesrcset="download-520.jpg 520w, download.jpg 825w"
       imagesizes="(max-width: 846px) 380px, 520px" fetchpriority="high">
 
-<!-- Google Fonts 비동기 로드 (렌더 블로킹 제거) -->
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" media="print" onload="this.media='all'">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap"></noscript>
+<!-- 본문 폰트 프리로드 (서브셋 후 각 40KB) : 글자 늦게 뜨는 현상 방지 -->
+<link rel="preload" as="font" type="font/woff2" href="fonts/subset-MaplestoryLight.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="fonts/subset-MaplestoryBold.woff2" crossorigin>
+
+<!-- 외부 폰트 요청 없음: Maplestory는 로컬, 예비 폰트는 기기 내장 폰트 사용 -->
 
 <style>
 /* ===================================================================
@@ -130,8 +130,10 @@ main:focus { outline: none; }
 
 /* 햄버거 (원본과 동일: 데스크탑 숨김 / 모바일에서만 표시) */
 .hamburger {
-  position: absolute; right: 20px; top: 50%; transform: translateY(-50%);
-  display: none; flex-direction: column; gap: 6px; padding: 6px;
+  position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
+  display: none; flex-direction: column; align-items: center; justify-content: center;
+  gap: 6px; padding: 6px;
+  min-width: 48px; min-height: 48px;   /* 모바일 터치 영역 권장치(48x48) 확보 */
 }
 .hamburger span { display: block; width: 28px; height: 2px; background: #fff; }
 
@@ -454,7 +456,7 @@ main:focus { outline: none; }
 <aside id="aside">
   <div class="aside-head">
     <b>MENU</b>
-    <button class="close" id="asideClose" aria-label="닫기">✕</button>
+    <button class="close" id="asideClose" aria-label="닫기">×</button>
   </div>
   <nav aria-label="모바일 메뉴">
     <ul class="aside-menu">
