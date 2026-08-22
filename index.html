@@ -309,8 +309,17 @@ main:focus { outline: none; }
   font-size: 26px; line-height: 1; color: #fff; background: rgba(0,0,0,.5); border-radius: 50%;
 }
 .popup-close:focus-visible { border-radius: 50%; }   /* 원형 버튼에 맞는 포커스 링 */
-.popup-media { display: block; }
+.popup-media { display: block; position: relative; }
 .popup-media video { display: block; width: 100%; height: auto; aspect-ratio: 1000 / 1600; background: #000; }
+/* 자동재생이 막힌 기기에서만 노출되는 재생 버튼 */
+.popup-play {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 3;
+  width: 66px; height: 66px; border-radius: 50%; padding-left: 5px;
+  background: rgba(0,0,0,.55); border: 2px solid rgba(255,255,255,.85);
+  color: #fff; font-size: 24px; line-height: 1;
+  display: none; align-items: center; justify-content: center;
+}
+.popup-play.show { display: inline-flex; }
 .popup-foot { flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-left: 14px; border-top: 1px solid #222; }
 .popup-foot label { display: inline-flex; align-items: center; gap: 8px; min-height: 48px; font-size: 14px; color: #bbb; cursor: pointer; }
 .popup-foot input { width: 16px; height: 16px; accent-color: #ecd9b0; cursor: pointer; }
@@ -743,8 +752,14 @@ main:focus { outline: none; }
     <button type="button" class="popup-close" aria-label="팝업 닫기" data-popup-close>×</button>
     <!-- href 는 아래 스크립트의 LINK 값으로 채워진다 (비어 있으면 클릭해도 이동하지 않음) -->
     <a class="popup-media" id="popupLink" target="_blank" rel="noopener">
-      <video id="popupVideo" width="1000" height="1600" muted loop playsinline preload="none"
+      <!-- muted+playsinline+autoplay 는 모바일 자동재생의 필수 조건이라 하나라도 빼면 안 된다 -->
+      <!-- poster: 영상이 도착하기 전과 자동재생이 막힌 기기에서 대신 보이는 첫 프레임 -->
+      <video id="popupVideo" width="1000" height="1600" autoplay muted loop playsinline
+             webkit-playsinline disableremoteplayback preload="none"
+             poster="popup-poster.webp"
              aria-label="피씨365 안내 영상 배너"></video>
+      <!-- 저전력 모드 등으로 자동재생이 막혔을 때만 나타난다 -->
+      <button type="button" class="popup-play" id="popupPlay" aria-label="영상 재생">▶</button>
     </a>
     <div class="popup-foot">
       <label><input type="checkbox" id="popupHide"> 오늘 하루 보지 않기</label>
@@ -789,9 +804,35 @@ main:focus { outline: none; }
     var video = document.getElementById('popupVideo');
     var link  = document.getElementById('popupLink');
     var hide  = document.getElementById('popupHide');
+    var playBtn = document.getElementById('popupPlay');
     var lastFocus = null;
 
     if (LINK) link.href = LINK; else link.removeAttribute('href');
+
+    /* --- 재생 시도 -------------------------------------------------------
+       모바일에서 자동재생이 막히는 경로가 여러 가지라 한 번만 시도하면 안 된다.
+       막히면 ▶ 버튼을 띄우고, 사용자의 첫 동작·탭 복귀 때 다시 시도한다. */
+    function tryPlay(){
+      video.muted = true;                          // iOS 는 muted 가 풀리면 즉시 막는다
+      var p = video.play();
+      if (p && p.then) p.then(hintOff).catch(hintOn); else hintOff();
+    }
+    function hintOn(){ playBtn.classList.add('show'); }
+    function hintOff(){ playBtn.classList.remove('show'); }
+
+    playBtn.addEventListener('click', function(e){
+      e.preventDefault(); e.stopPropagation();     // 배너 링크로 넘어가지 않게
+      tryPlay();
+    });
+    // 사용자가 화면 어디든 건드리면 다시 시도(제스처가 있으면 대부분 풀린다)
+    ['touchstart', 'pointerdown'].forEach(function(ev){
+      document.addEventListener(ev, function(){ if (video.paused && popup.classList.contains('open')) tryPlay(); }, { passive: true });
+    });
+    // 다른 앱 갔다 돌아오면 멈춰 있는 경우가 있다
+    document.addEventListener('visibilitychange', function(){
+      if (!document.hidden && popup.classList.contains('open') && video.paused) tryPlay();
+    });
+    video.addEventListener('canplay', function(){ if (video.paused) tryPlay(); });
 
     function onKey(e){
       if (e.key === 'Escape') { close(); return; }
@@ -808,8 +849,6 @@ main:focus { outline: none; }
       document.body.style.overflow = 'hidden';
       popup.querySelector('.popup-box').focus();
       document.addEventListener('keydown', onKey);
-      var p = video.play();               // 자동재생이 막혀도 첫 프레임은 보이므로 조용히 넘어간다
-      if (p && p.catch) p.catch(function(){});
     }
     function close(){
       if (hide.checked) { try { localStorage.setItem(KEY, String(Date.now() + 86400000)); } catch(e) {} }
@@ -824,24 +863,25 @@ main:focus { outline: none; }
     });
 
     // 히어로 이미지(LCP)를 먼저 받게 한 뒤에 영상을 내려받는다.
-    //  · 첫 프레임이 준비되면 바로 노출, 느리면 1.2초 뒤 그냥 노출
-    //  · 파일이 없거나 코덱을 못 읽으면 팝업을 걷어낸다(깨진 팝업 방지)
+    //
+    // ★ 순서 주의: 팝업을 먼저 보이게 한 다음 영상을 물린다.
+    //   display:none 상태에서 load()/play() 를 하면 iOS Safari 가 자동재생을 거부해
+    //   첫 프레임에서 멈춘 것처럼 보인다. 이 두 줄의 순서를 바꾸지 말 것.
     function start(){
-      var settled = false;
-      function show(){ if (!settled) { settled = true; open(); } }
-      function fail(){
-        settled = true;
-        popup.classList.remove('open');
-        document.body.style.overflow = '';
-        document.removeEventListener('keydown', onKey);
-      }
+      open();                             // ← 먼저 렌더 트리에 올린다
       video.muted = true;                 // 자동재생 허용 조건
       video.preload = 'auto';
-      video.addEventListener('loadeddata', show, { once: true });
-      video.addEventListener('error', fail, { once: true });
-      setTimeout(show, 1200);
+      video.addEventListener('error', function(){
+        close_silent();                   // 파일이 없거나 코덱을 못 읽으면 팝업을 걷어낸다
+      }, { once: true });
       video.src = VIDEO;
       video.load();
+      tryPlay();
+    }
+    function close_silent(){
+      popup.classList.remove('open');
+      document.body.style.overflow = '';
+      document.removeEventListener('keydown', onKey);
     }
     if (document.readyState === 'complete') start();
     else window.addEventListener('load', start);
